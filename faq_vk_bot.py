@@ -18,7 +18,7 @@ async def wrapper(ans: Message):
 
 @bot.on.message_handler(commands=["list"])
 async def wrapper(ans: Message):
-    await ans('Список вопросов, на которые я знаю ответ: \n• ' + '\n• '.join(similarity.questions))
+    await ans('Список вопросов, на которые я знаю ответ: \n• ' + '\n• '.join(similarity.questions.columns[0]))
 
 @bot.on.chat_invite()
 async def wrapper(ans: Message):
@@ -28,7 +28,7 @@ async def wrapper(ans: Message):
               "\n/help – помощь"
               "\n/list – вопросы, на которые я знаю ответ")
 
-@bot.on.message_handler(text="бот<text>", lower=True)
+@bot.on.message_handler(text="<text>", lower=True)
 async def wrapper(ans: Message, text):
     await ans(similarity.get_answer(text))
 
