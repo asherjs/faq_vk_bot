@@ -14,31 +14,38 @@ log = open('logs/queries_history.log', 'a')
 used_embedder = 'xlm-r-40langs-bert-base-nli-stsb-mean-tokens'
 embedder = SentenceTransformer(used_embedder)
 
-data = pd.read_csv('data/data.csv')
-raw_questions = data["questions"].str.split(DB_DELIMITER, expand=True)
+def prepare_data(path):
+    data = pd.read_csv(path)
+    answers = data["answers"]
+    if DB_DELIMITER == "":
+        raw_questions = data["questions"]
+        questions = raw_questions.to_frame("question").reset_index()
+        return questions, answers
+    else:
+        # transform DataFrame's question columns into Series without NaN values
+        raw_questions = data["questions"].str.split(DB_DELIMITER, expand=True)
+        num_columns = raw_questions.columns.shape[0]
+        questions = raw_questions.iloc[:, 0]
+        for col_num in range(1, num_columns):
+            questions = pd.concat([questions, raw_questions.iloc[:, col_num]])
+        questions = pd.DataFrame(questions, columns=["question"]).dropna().reset_index()
+        return questions, answers
 
-# transform DataFrame's question columns into Series without NaN values
-num_columns = raw_questions.columns.shape[0]
-questions = raw_questions.iloc[:, 0]
-for col_num in range(1, num_columns):
-    questions = pd.concat([questions, raw_questions.iloc[:, col_num]])
-questions = pd.DataFrame(questions, columns=["question"]).dropna().reset_index()
-
-answers = data["answers"]
-
-embedding_cache_path = 'question_embeddings.pkl'
-if not os.path.exists(embedding_cache_path):
-    print("Encode the corpus. This might take a while")
-    embeddings = embedder.encode(questions["question"], show_progress_bar=True)
-    print("Store file on disc")
-    with open(embedding_cache_path, "wb") as fout:
-        pickle.dump({'embedding': embeddings}, fout)
-else:
-    print("Load embeddings from disc")
-    with open(embedding_cache_path, "rb") as fin:
-        cache_data = pickle.load(fin)
-        embeddings = cache_data['embedding'][0:MAX_CORPUS_SIZE]
+def calculate_embeddings(questions, path: str = "question_embeddings.pkl", ):
+    embedding_cache_path = path
+    if not os.path.exists(embedding_cache_path):
+        print("Encode the corpus. This might take a while")
+        embeddings = embedder.encode(questions["question"], show_progress_bar=True)
+        print("Store file on disc")
+        with open(embedding_cache_path, "wb") as fout:
+            pickle.dump({'embedding': embeddings}, fout)
+    else:
+        print("Load embeddings from disc")
+        with open(embedding_cache_path, "rb") as fin:
+            cache_data = pickle.load(fin)
+            embeddings = cache_data['embedding'][0:MAX_CORPUS_SIZE]
     print(f"Corpus loaded with {len(embeddings)} sentences / embeddings")
+    return embeddings
 
 def get_scores(query):
     query_embedding = embedder.encode(query)
@@ -71,3 +78,6 @@ def get_answer(query):
     else:
         log.flush()
         return answers[idx]
+
+questions, answers = prepare_data('data/questions.csv')
+embeddings = calculate_embeddings(questions)
