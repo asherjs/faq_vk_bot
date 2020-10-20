@@ -31,7 +31,7 @@ pip3 install -r requirements.txt
 ```
 После этого ввести в терминале:
 ```
-  python main.py
+  python vk_faq_bot.py
 ```
 
 ### Использование
