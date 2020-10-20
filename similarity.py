@@ -11,7 +11,7 @@ DB_DELIMITER = ""
 
 log = open('logs/queries_history.log', 'a')
 
-used_embedder = 'xlm-r-40langs-bert-base-nli-stsb-mean-tokens'
+used_embedder = 'xlm-r-100langs-bert-base-nli-stsb-mean-tokens'
 embedder = SentenceTransformer(used_embedder)
 
 def prepare_data(path):
