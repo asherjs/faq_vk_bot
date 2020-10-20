@@ -3,7 +3,6 @@ from vkbottle.api.uploader.doc import DocUploader
 import logging
 import similarity
 import json
-import os.path
 
 logging.basicConfig(filename="logs/bot.log", level=logging.INFO, format='%(asctime)s  %(name)s  %(levelname)s: %(message)s')
 

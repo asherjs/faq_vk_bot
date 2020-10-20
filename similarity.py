@@ -7,7 +7,7 @@ import os
 
 THRESHOLD = 0.6
 MAX_CORPUS_SIZE = 1000
-DB_DELIMITER = "__eou__"
+DB_DELIMITER = "" 
 
 log = open('logs/queries_history.log', 'a')
 
